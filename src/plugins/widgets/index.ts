@@ -1,4 +1,5 @@
 import css from "./css";
+import feedly from "./feedly";
 import github from "./github";
 import greeting from "./greeting";
 import ipInfo from "./ipInfo";
@@ -18,6 +19,7 @@ import joke from "./joke";
 
 export const widgetConfigs = [
   css,
+  feedly,
   github,
   greeting,
   ipInfo,
