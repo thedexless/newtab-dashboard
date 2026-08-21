@@ -1,5 +1,16 @@
 import { init, captureException, setTag } from "@sentry/browser";
 
+const EXTENSION_URL_REPLACEMENTS: [RegExp, string][] = [
+  [
+    /moz-extension:\/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
+    "resource://tabliss-extension",
+  ],
+  [
+    /chrome-extension:\/\/hipekcciheckooncpjeljhnekcoolahp/g,
+    "resource://tabliss-extension",
+  ],
+];
+
 export function register(): void {
   init({
     autoSessionTracking: false, // Wtf sentry
@@ -12,16 +23,9 @@ export function register(): void {
 
 export function capture(error: Error): void {
   if (error.stack) {
-    // Replace firefox extension URLs
-    error.stack = error.stack.replace(
-      /moz-extension:\/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
-      "resource://tabliss-extension",
-    );
-
-    // Replace chrome extension URLs
-    error.stack = error.stack.replace(
-      /chrome-extension:\/\/hipekcciheckooncpjeljhnekcoolahp/g,
-      "resource://tabliss-extension",
+    error.stack = EXTENSION_URL_REPLACEMENTS.reduce(
+      (stack, [pattern, replacement]) => stack.replace(pattern, replacement),
+      error.stack,
     );
   }
 

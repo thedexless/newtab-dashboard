@@ -12,9 +12,7 @@ const Js: FC<Props> = ({ data = defaultData }) => {
 
     document.head.appendChild(script);
 
-    return () => {
-      document.head.removeChild(script);
-    };
+    return () => script.remove();
   }, [data.input]);
 
   return null;

@@ -3,7 +3,7 @@ import { Action } from "./actions";
 
 type State = Link[];
 
-export function reducer(state: State, action: Action) {
+export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "ADD_LINK":
       return state.concat({ url: "https://" });
@@ -16,10 +16,11 @@ export function reducer(state: State, action: Action) {
         index === action.data.index ? action.data.link : link,
       );
 
-    case "REORDER_LINK":
+    case "REORDER_LINK": {
       const links = [...state];
       links.splice(action.data.to, 0, links.splice(action.data.index, 1)[0]);
       return links;
+    }
 
     default:
       throw new Error("Unknown action");

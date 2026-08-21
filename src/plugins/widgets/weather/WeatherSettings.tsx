@@ -10,7 +10,7 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
       onChange={(location) => setData({ ...data, ...location })}
     />
 
-    {data.latitude && data.latitude ? (
+    {data.latitude && data.longitude ? (
       <>
         <label>
           Name

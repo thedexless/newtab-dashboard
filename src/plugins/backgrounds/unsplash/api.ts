@@ -22,25 +22,20 @@ export const fetchImages = async ({
 
   params.set("count", "10");
 
-  switch (by) {
-    case "collections":
-      params.set("collections", collections);
-      break;
-
-    case "topics":
+  const applyParams: Record<Config["by"], () => void> = {
+    collections: () => params.set("collections", collections),
+    topics: () => {
       params.set("topics", topics);
       params.set("orientation", "landscape");
-      break;
-
-    case "search":
+    },
+    search: () => {
       params.set("orientation", "landscape");
       if (featured) params.set("featured", "true");
       if (search) params.set("query", search);
-      break;
-
-    default:
-      params.set("collections", String(officialCollection));
-  }
+    },
+    official: () => params.set("collections", String(officialCollection)),
+  };
+  applyParams[by]();
 
   const res = await fetch(`${url}?${params}`, { headers, cache: "no-cache" });
   const body = await res.json();
@@ -76,10 +71,7 @@ export const buildLink = (src: string): string => {
  * Calculate width to fetch image, tuned for Unsplash cache performance.
  */
 export function calculateWidth(screenWidth = 1920, pixelRatio = 1): number {
-  // Consider a minimum resolution too
-  screenWidth = screenWidth * pixelRatio; // Find true resolution
-  screenWidth = Math.max(screenWidth, 1920); // Lower limit at 1920
-  screenWidth = Math.min(screenWidth, 3840); // Upper limit at 4K
-  screenWidth = Math.ceil(screenWidth / 240) * 240; // Snap up to nearest 240px for improved caching
-  return screenWidth;
+  return Math.ceil(
+    Math.min(Math.max(screenWidth * pixelRatio, 1920), 3840) / 240,
+  ) * 240;
 }

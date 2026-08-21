@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 function isInputEvent(event: KeyboardEvent) {
   return (
@@ -14,21 +14,22 @@ export function useKeyPress(
   detectKeys: string[],
   ignoreInputEvents = true,
 ) {
-  const handler = (event: KeyboardEvent) => {
-    if (
-      detectKeys.includes(event.key) &&
-      !(ignoreInputEvents && isInputEvent(event)) &&
-      !(event.ctrlKey || event.metaKey || event.altKey)
-    ) {
-      callback(event);
-    }
-  };
+  const handler = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        detectKeys.includes(event.key) &&
+        !(ignoreInputEvents && isInputEvent(event)) &&
+        !(event.ctrlKey || event.metaKey || event.altKey)
+      ) {
+        callback(event);
+      }
+    },
+    [callback, detectKeys, ignoreInputEvents],
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handler);
 
-    return () => {
-      window.removeEventListener("keydown", handler);
-    };
-  }, [ignoreInputEvents, callback]);
+    return () => window.removeEventListener("keydown", handler);
+  }, [handler]);
 }

@@ -23,15 +23,15 @@ const Backdrop: React.FC<Props> = ({
   const background = useValue(db, "background");
   const { blur, luminosity = 0 } = background.display;
 
-  style = { ...style };
+  const backdropStyle: React.CSSProperties = { ...style };
 
   if (blur && !focus) {
-    style["filter"] = `blur(${blur}px)`;
-    style["transform"] = `scale(${blur / 500 + 1})`;
+    backdropStyle.filter = `blur(${blur}px)`;
+    backdropStyle.transform = `scale(${blur / 500 + 1})`;
   }
 
   if (luminosity && !focus) {
-    style["opacity"] = 1 - Math.abs(luminosity);
+    backdropStyle.opacity = 1 - Math.abs(luminosity);
   }
 
   return (
@@ -42,7 +42,7 @@ const Backdrop: React.FC<Props> = ({
         transition: "opacity 150ms ease-in-out",
       }}
     >
-      <div style={style} {...rest}>
+      <div style={backdropStyle} {...rest}>
         {children}
       </div>
     </div>

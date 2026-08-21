@@ -33,7 +33,7 @@ export const useSelector = <T>(db: DB.Database, selector: () => T): T => {
     return DB.listen(db, () => {
       setState(selector());
     });
-  }, [db, selector, setState]);
+  }, [db, selector]);
   return state;
 };
 

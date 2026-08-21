@@ -2,7 +2,7 @@ import { API } from "../../types";
 import { Quote } from "./types";
 
 // Get developer excuse
-async function getDeveloperExcuse() {
+async function getDeveloperExcuse(): Promise<Partial<Quote>> {
   try {
     const res = await fetch("https://api.tabliss.io/v1/developer-excuses");
     const body = await res.json();
@@ -17,122 +17,94 @@ async function getDeveloperExcuse() {
   }
 }
 
+/** Shared 429 handler — extracts the message and returns a "too many requests" response. */
+function tooManyRequests(body: any): { author: string; quote: string } {
+  return {
+    author: body.error.message.split(".")[1] + ".",
+    quote: "Too many requests this hour.",
+  };
+}
+
 // Get quote of the day
-async function getQuoteOfTheDay(category?: string) {
-  const res = await fetch(
-    "https://quotes.rest/qod.json" + (category ? `?category=${category}` : ""),
-  );
+async function getQuoteOfTheDay(category?: string): Promise<Partial<Quote>> {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+
+  const url = `https://quotes.rest/qod.json${
+    category ? `?${params}` : ""
+  }`;
+  const res = await fetch(url);
   const body = await res.json();
 
-  if (res.status === 429) {
-    return {
-      author: body.error.message.split(".")[1] + ".",
-      quote: "Too many requests this hour.",
-    };
-  }
+  if (res.status === 429) return tooManyRequests(body);
 
-  if (
-    body &&
-    body.contents &&
-    body.contents.quotes &&
-    body.contents.quotes[0]
-  ) {
+  if (body?.contents?.quotes?.[0]) {
     return {
       author: body.contents.quotes[0].author,
       quote: body.contents.quotes[0].quote,
     };
   }
 
-  return {
-    author: null,
-    quote: null,
-  };
+  return {};
 }
 
 // Get bible verse of the day
-async function getBibleVerse() {
+async function getBibleVerse(): Promise<Partial<Quote>> {
   const res = await fetch("https://quotes.rest/bible/vod.json");
-
   const body = await res.json();
 
-  if (res.status === 429) {
-    return {
-      author: body.error.message.split(".")[1] + ".",
-      quote: "Too many requests this hour.",
-    };
-  }
+  if (res.status === 429) return tooManyRequests(body);
 
-  if (body && body.contents) {
+  if (body?.contents) {
     return {
-      author:
-        body.contents.book +
-        " " +
-        body.contents.chapter +
-        ":" +
-        body.contents.number,
+      author: `${body.contents.book} ${body.contents.chapter}:${body.contents.number}`,
       quote: body.contents.verse,
     };
   }
 
-  return {
-    author: null,
-    quote: null,
-  };
+  return {};
 }
 
 export async function getQuote(
   loader: API["loader"],
   category: string,
 ): Promise<Quote> {
+  const fetchByCategory: Record<string, () => Promise<Partial<Quote>>> = {
+    developerexcuses: getDeveloperExcuse,
+    bible: getBibleVerse,
+  };
+  const fetcher = fetchByCategory[category] ?? (() => getQuoteOfTheDay(category));
+
   loader.push();
-
-  const data =
-    category === "developerexcuses"
-      ? await getDeveloperExcuse()
-      : category === "bible"
-        ? await getBibleVerse()
-        : await getQuoteOfTheDay(category);
-
+  const data = await fetcher();
   loader.pop();
-
-  const quote = cleanQuote(data.quote);
 
   return {
     ...data,
-    quote,
+    quote: cleanQuote(data.quote ?? ""),
     timestamp: Date.now(),
   };
 }
 
-function cleanQuote(quote: string) {
-  // We remove whitespaces at the beginning and the end of the quote.
-  quote = quote.trim();
+function cleanQuote(rawQuote: string) {
+  const replacements: [RegExp, string][] = [
+    // Change straight quotes following a non-whitespace char to closing curvy quote (’)
+    [/(\S)'|"/g, "$1’"],
+    // Change remaining straight quotes (following whitespace) to opening curvy quote (‘)
+    [/(^|\s)'|"/g, "$1‘"],
+    // Replace 3+ dots with proper ellipsis (…)
+    [/\.{3,}/g, "…"],
+    // Collapse multiple spaces into one
+    [/\s{2,}/g, " "],
+    // Replace dashes between whitespace with proper em dash (—)
+    [/\s-\s/g, "—"],
+  ];
 
-  // We change all straight quotes (' and ") following a non-whitespace character by
-  // a closing curvy quote (’).
-  const singleStraightQuote = new RegExp(/(\S)'|"/, "g");
-  quote = quote.replace(singleStraightQuote, "$1’");
+  const quote = replacements.reduce(
+    (q, [pattern, replacement]) => q.replace(pattern, replacement),
+    rawQuote.trim(),
+  );
 
-  // We now change all remaining straight quotes (all following a whitespace
-  // character) by an opening curvy quote (‘).
-  const openingStraightQuote = new RegExp(/(^|\s)'|"/, "g");
-  quote = quote.replace(openingStraightQuote, "$1‘");
-
-  // We replace all series of three dots or more by a proper ellipsis (…).
-  const threeDots = new RegExp(/\.{3,}/, "g");
-  quote = quote.replace(threeDots, "…");
-
-  // We replace all series of spaces by a single one.
-  const spaces = new RegExp(/\s{2,}/, "g");
-  quote = quote.replace(spaces, " ");
-
-  // We replace all dashes between whitespace characters by a proper em dash (—).
-  const dash = new RegExp(/\s-\s/, "g");
-  quote = quote.replace(dash, "—");
-
-  // We add a period at the end of the quote if need be.
-  const closingPunctuation = new RegExp(/[.\?!…’]$/);
-  if (!quote.match(closingPunctuation)) quote = quote + ".";
-
-  return quote;
+  // Add a period at the end if there's no closing punctuation
+  return /[.?!…']$/.test(quote) ? quote : `${quote}.`;
 }

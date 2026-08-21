@@ -24,7 +24,7 @@ const Weather: React.FC<Props> = ({
       getForecast(data, loader).then(setCache);
     },
     cache ? cache.timestamp + 6 * HOURS : 0,
-    [data.latitude, data.latitude, data.units],
+    [data.latitude, data.longitude, data.units],
   );
 
   const conditions =

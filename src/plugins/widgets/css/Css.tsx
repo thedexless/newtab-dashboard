@@ -12,9 +12,7 @@ const Css: React.FC<Props> = ({ data = defaultData }) => {
 
     document.head.appendChild(style);
 
-    return () => {
-      document.head.removeChild(style);
-    };
+    return () => style.remove();
   }, [data.input]);
 
   return null;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePushError } from "../api";
 
 function areWeFullscreen() {
@@ -9,16 +9,20 @@ export function useFullscreen() {
   const pushError = usePushError();
   const [isFullscreen, setIsFullscreen] = useState(areWeFullscreen());
 
-  const toggleFullscreen = document.fullscreenEnabled
-    ? () =>
-        document.fullscreenElement
-          ? document.exitFullscreen()
-          : document.documentElement.requestFullscreen().catch(pushError)
-    : false;
+  const enterOrExit = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen().catch(pushError);
+    }
+  }, [pushError]);
+
+  const toggleFullscreen = document.fullscreenEnabled ? enterOrExit : false;
 
   useEffect(() => {
-    const onChange = () => setIsFullscreen(areWeFullscreen());
+    if (!document.fullscreenEnabled) return;
 
+    const onChange = () => setIsFullscreen(areWeFullscreen());
     document.onfullscreenchange = onChange;
     return () => {
       document.onfullscreenchange = null;
