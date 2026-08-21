@@ -20,16 +20,23 @@ export function getSuggestions(query: string, engineUrl: string) {
 
     const id = "i" + Math.random().toString(36).slice(2); // Unique id to return to correct result
 
-    window.mountResult[id] = (data: SuggestionsResult) => {
-      resolve(data[1]);
+    const cleanup = () => {
       delete window.mountResult?.[id];
       document.getElementById(`suggestionsQuery${id}`)?.remove();
+    };
+
+    window.mountResult[id] = (data: SuggestionsResult) => {
+      cleanup();
+      resolve(data[1]);
     };
 
     const scriptToAdd = document.createElement("script");
 
     scriptToAdd.id = `suggestionsQuery${id}`;
-    scriptToAdd.onerror = reject;
+    scriptToAdd.onerror = () => {
+      cleanup();
+      reject(new Error("Failed to load suggestions"));
+    };
     scriptToAdd.src = engineUrl
       .replace("{searchTerms}", query)
       .replace("{callback}", `mountResult.${id}`);

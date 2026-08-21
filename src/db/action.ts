@@ -80,9 +80,10 @@ export const importStore = (dump: any): void => {
   if (typeof dump !== "object" || dump === null)
     throw new TypeError("Unexpected format");
 
-  resetStore();
-
+  // Normalize and validate before clearing, so a failed import
+  // does not wipe existing settings.
   const { entries } = normalizeDump(dump);
+  resetStore();
   // @ts-ignore
   Object.entries(entries).forEach(([key, val]) => DB.put(db, key, val));
 };
@@ -91,9 +92,13 @@ export const importStore = (dump: any): void => {
 function normalizeDump(dump: any): { entries: Record<string, unknown> } {
   if ("backgrounds" in dump) {
     // Version 2 config
-    DB.put(db, `widget/default-time`, null);
-    DB.put(db, `widget/default-greeting`, null);
-    return { entries: migrateFrom2(dump) };
+    return {
+      entries: {
+        ...migrateFrom2(dump),
+        "widget/default-time": null,
+        "widget/default-greeting": null,
+      },
+    };
   }
 
   if (dump.version === 3) {

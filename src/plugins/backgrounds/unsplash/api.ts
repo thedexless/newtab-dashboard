@@ -35,7 +35,7 @@ export const fetchImages = async ({
     },
     official: () => params.set("collections", String(officialCollection)),
   };
-  applyParams[by]();
+  (applyParams[by] || applyParams.official)();
 
   const res = await fetch(`${url}?${params}`, { headers, cache: "no-cache" });
   const body = await res.json();

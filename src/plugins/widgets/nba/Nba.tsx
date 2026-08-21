@@ -31,7 +31,7 @@ const Nba: React.FC<Props> = ({
   }
 
   const renderLogo = (logo: string) =>
-    data.displayLogo ? <img className="icon" src={logo} /> : null;
+    data.displayLogo ? <img className="icon" src={logo} alt="" /> : null;
 
   return (
     <div className="nba-container">

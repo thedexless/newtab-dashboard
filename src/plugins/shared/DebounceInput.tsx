@@ -17,10 +17,17 @@ export const DebounceInput: FC<Props> = ({
   const [newValue, setNewValue] = useState(value);
   const debouncedValue = useDebounce(newValue, wait);
 
+  // Sync internal state when the parent value changes externally,
+  // so the input reflects the latest prop without invoking onChange.
+  useEffect(() => {
+    setNewValue(value);
+  }, [value]);
+
+  // Fire onChange only for debounced local edits, not external syncs.
   useEffect(() => {
     if (debouncedValue === value) return;
     onChange(debouncedValue);
-  }, [debouncedValue, onChange, value]);
+  }, [debouncedValue, onChange]);
 
   return (
     <input

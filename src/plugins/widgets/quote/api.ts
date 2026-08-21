@@ -106,5 +106,5 @@ function cleanQuote(rawQuote: string) {
   );
 
   // Add a period at the end if there's no closing punctuation
-  return /[.?!…']$/.test(quote) ? quote : `${quote}.`;
+  return /[.?!…’"']$/.test(quote) ? quote : `${quote}.`;
 }
