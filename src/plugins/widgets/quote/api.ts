@@ -81,7 +81,7 @@ export async function getQuote(
 
   return {
     ...data,
-    quote: cleanQuote(data.quote ?? ""),
+    quote: data.quote && data.quote.trim() ? cleanQuote(data.quote) : "",
     timestamp: Date.now(),
   };
 }
