@@ -3,6 +3,7 @@ import { useToggle } from "../../../hooks";
 import { Icon } from "../../../views/shared";
 import { geocodeLocation, requestLocation } from "./api";
 import "./LocationInput.sass";
+import { parseLatitude, parseLongitude } from "./coordinates";
 import { Coordinates } from "./types";
 
 type Props = {
@@ -62,6 +63,18 @@ const CoordinateInput: React.FC<Props> = ({
   longitude,
   onChange,
 }) => {
+  const [latStr, setLatStr] = React.useState(latitude?.toString() ?? "");
+  const [longStr, setLongStr] = React.useState(longitude?.toString() ?? "");
+
+  // Sync local drafts when the parent updates the coordinates externally
+  // (e.g. geolocation). Intermediate edits are preserved between prop changes.
+  React.useEffect(() => {
+    setLatStr(latitude?.toString() ?? "");
+  }, [latitude]);
+  React.useEffect(() => {
+    setLongStr(longitude?.toString() ?? "");
+  }, [longitude]);
+
   const handleLocate = () => {
     requestLocation()
       .then(onChange)
@@ -87,20 +100,20 @@ const CoordinateInput: React.FC<Props> = ({
         <input
           id="LocationInput__latitude"
           type="text"
-          value={latitude}
+          value={latStr}
           onChange={(event) => {
-            const lat = Number(event.target.value);
-            onChange({ latitude: isValidLatitude(lat) ? lat : undefined });
+            setLatStr(event.target.value);
+            onChange({ latitude: parseLatitude(event.target.value) });
           }}
         />
 
         <input
           id="LocationInput__longitude"
           type="text"
-          value={longitude}
+          value={longStr}
           onChange={(event) => {
-            const long = Number(event.target.value);
-            onChange({ longitude: isValidLongitude(long) ? long : undefined });
+            setLongStr(event.target.value);
+            onChange({ longitude: parseLongitude(event.target.value) });
           }}
         />
 

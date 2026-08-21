@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect, useRef } from "react";
+import React, { FC, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useDebounce } from "../../hooks";
 
 interface Props
@@ -24,7 +24,9 @@ export const DebounceInput: FC<Props> = ({
   // Keep the latest onChange in a ref so callback identity changes do not
   // retrigger the propagation effect or send stale debounced data.
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   // Sync internal state when the parent value changes externally,
   // so the input reflects the latest prop without invoking onChange.

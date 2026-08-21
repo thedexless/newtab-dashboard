@@ -18,6 +18,9 @@ const messages = defineMessages({
 const Search: FC<Props> = ({ data = defaultData }) => {
   const searchInput = useRef<HTMLInputElement>(null);
   const previousValue = useRef("");
+  // Monotonic identifier for in-flight suggestion requests; stale responses
+  // (whose id no longer matches the latest) are discarded to avoid races.
+  const requestId = useRef(0);
 
   const [active, setActive] = useState<number>();
   const [suggestions, setSuggestions] = useState<string[]>();
@@ -34,12 +37,15 @@ const Search: FC<Props> = ({ data = defaultData }) => {
     if (BUILD_TARGET === "web") {
       const suggestUrl = getSuggestUrl(data.suggestionsEngine);
       if (suggestUrl) {
+        const id = ++requestId.current;
         getSuggestions(event.target.value, suggestUrl)
           .then((suggestions) => {
+            if (id !== requestId.current) return;
             setSuggestions(suggestions.slice(0, data.suggestionsQuantity));
             setActive(undefined);
           })
           .catch(() => {
+            if (id !== requestId.current) return;
             setSuggestions(undefined);
             setActive(undefined);
           });
