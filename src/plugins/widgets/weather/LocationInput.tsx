@@ -11,6 +11,15 @@ type Props = {
   onChange: (location: Coordinates & { name?: string }) => void;
 };
 
+const isValidLatitude = (lat?: number) =>
+  lat != null && Number.isFinite(lat) && lat >= -90 && lat <= 90;
+
+const isValidLongitude = (long?: number) =>
+  long != null && Number.isFinite(long) && long >= -180 && long <= 180;
+
+const isValidCoordinates = (lat?: number, long?: number) =>
+  isValidLatitude(lat) && isValidLongitude(long);
+
 const GeocodeInput: React.FC<Props> = ({ onChange }) => {
   const [query, setQuery] = React.useState("");
 
@@ -79,18 +88,20 @@ const CoordinateInput: React.FC<Props> = ({
           id="LocationInput__latitude"
           type="text"
           value={latitude}
-          onChange={(event) =>
-            onChange({ latitude: Number(event.target.value) })
-          }
+          onChange={(event) => {
+            const lat = Number(event.target.value);
+            onChange({ latitude: isValidLatitude(lat) ? lat : undefined });
+          }}
         />
 
         <input
           id="LocationInput__longitude"
           type="text"
           value={longitude}
-          onChange={(event) =>
-            onChange({ longitude: Number(event.target.value) })
-          }
+          onChange={(event) => {
+            const long = Number(event.target.value);
+            onChange({ longitude: isValidLongitude(long) ? long : undefined });
+          }}
         />
 
         {geolocationAvailable && (
@@ -107,7 +118,7 @@ const CoordinateInput: React.FC<Props> = ({
 };
 
 const LocationInput: React.FC<Props> = ({ onChange, ...props }) => {
-  const hasCoordinates = props.longitude && props.latitude;
+  const hasCoordinates = isValidCoordinates(props.latitude, props.longitude);
   const [lookUp, toggleLookUp] = useToggle(!hasCoordinates);
 
   const handleChange = (coords: Coordinates) => {
