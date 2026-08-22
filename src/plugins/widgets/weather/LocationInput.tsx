@@ -4,6 +4,7 @@ import { Icon } from "../../../views/shared";
 import { geocodeLocation, requestLocation } from "./api";
 import "./LocationInput.sass";
 import { parseLatitude, parseLongitude } from "./coordinates";
+import { draftFromProp } from "./draftSync";
 import { Coordinates } from "./types";
 
 type Props = {
@@ -66,13 +67,16 @@ const CoordinateInput: React.FC<Props> = ({
   const [latStr, setLatStr] = React.useState(latitude?.toString() ?? "");
   const [longStr, setLongStr] = React.useState(longitude?.toString() ?? "");
 
-  // Sync local drafts when the parent updates the coordinates externally
-  // (e.g. geolocation). Intermediate edits are preserved between prop changes.
+  // Sync local drafts only for genuine external coordinate updates
+  // (e.g. geolocation). Intermediate edits that parse to undefined
+  // (like "-" while typing a negative) are preserved, not overwritten.
   React.useEffect(() => {
-    setLatStr(latitude?.toString() ?? "");
+    const next = draftFromProp(latitude, isValidLatitude);
+    if (next !== null) setLatStr(next);
   }, [latitude]);
   React.useEffect(() => {
-    setLongStr(longitude?.toString() ?? "");
+    const next = draftFromProp(longitude, isValidLongitude);
+    if (next !== null) setLongStr(next);
   }, [longitude]);
 
   const handleLocate = () => {
