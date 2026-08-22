@@ -68,14 +68,15 @@ const CoordinateInput: React.FC<Props> = ({
   const [longStr, setLongStr] = React.useState(longitude?.toString() ?? "");
 
   // Sync local drafts only for genuine external coordinate updates
-  // (e.g. geolocation). Intermediate edits that parse to undefined
-  // (like "-" while typing a negative) are preserved, not overwritten.
+  // (e.g. geolocation). Intermediate edits that parse to the same value as
+  // the prop (like "1." while the prop is 1, or "-" which parses to
+  // undefined) are preserved, not overwritten.
   React.useEffect(() => {
-    const next = draftFromProp(latitude, isValidLatitude);
+    const next = draftFromProp(latitude, isValidLatitude, latStr, parseLatitude);
     if (next !== null) setLatStr(next);
   }, [latitude]);
   React.useEffect(() => {
-    const next = draftFromProp(longitude, isValidLongitude);
+    const next = draftFromProp(longitude, isValidLongitude, longStr, parseLongitude);
     if (next !== null) setLongStr(next);
   }, [longitude]);
 
