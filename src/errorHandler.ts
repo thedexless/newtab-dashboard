@@ -1,13 +1,9 @@
-import { init, captureException, setTag } from "@sentry/browser";
+import * as Sentry from "@sentry/react";
 
+// Sentry is initialized in main.tsx — this module only adds the error
+// handler integration (captureException + target tag).
 export function register(): void {
-  init({
-    autoSessionTracking: false, // Wtf sentry
-    dsn: "https://2e0e75c7477c4c3e9572ee97241e569c@o113629.ingest.sentry.io/250221",
-    enabled: !DEV,
-    release: VERSION,
-  });
-  setTag("target", BUILD_TARGET);
+  Sentry.setTag("target", BUILD_TARGET);
 }
 
 export function capture(error: Error): void {
@@ -25,5 +21,5 @@ export function capture(error: Error): void {
     );
   }
 
-  captureException(error);
+  Sentry.captureException(error);
 }

@@ -16,7 +16,6 @@
     "translations": "node ./scripts/translations.js"
   },
   "dependencies": {
-    "@sentry/browser": "^7.93.0",
     "@sentry/react": "^10.70.0",
     "core-js": "^3.35.0",
     "date-fns": "^2.30.0",
