@@ -3,6 +3,8 @@ import { useToggle } from "../../../hooks";
 import { Icon } from "../../../views/shared";
 import { geocodeLocation, requestLocation } from "./api";
 import "./LocationInput.sass";
+import { parseLatitude, parseLongitude } from "./coordinates";
+import { draftFromProp } from "./draftSync";
 import { Coordinates } from "./types";
 
 type Props = {
@@ -10,6 +12,15 @@ type Props = {
   longitude?: number;
   onChange: (location: Coordinates & { name?: string }) => void;
 };
+
+const isValidLatitude = (lat?: number) =>
+  lat != null && Number.isFinite(lat) && lat >= -90 && lat <= 90;
+
+const isValidLongitude = (long?: number) =>
+  long != null && Number.isFinite(long) && long >= -180 && long <= 180;
+
+const isValidCoordinates = (lat?: number, long?: number) =>
+  isValidLatitude(lat) && isValidLongitude(long);
 
 const GeocodeInput: React.FC<Props> = ({ onChange }) => {
   const [query, setQuery] = React.useState("");
@@ -53,6 +64,22 @@ const CoordinateInput: React.FC<Props> = ({
   longitude,
   onChange,
 }) => {
+  const [latStr, setLatStr] = React.useState(latitude?.toString() ?? "");
+  const [longStr, setLongStr] = React.useState(longitude?.toString() ?? "");
+
+  // Sync local drafts only for genuine external coordinate updates
+  // (e.g. geolocation). Intermediate edits that parse to the same value as
+  // the prop (like "1." while the prop is 1, or "-" which parses to
+  // undefined) are preserved, not overwritten.
+  React.useEffect(() => {
+    const next = draftFromProp(latitude, isValidLatitude, latStr, parseLatitude);
+    if (next !== null) setLatStr(next);
+  }, [latitude]);
+  React.useEffect(() => {
+    const next = draftFromProp(longitude, isValidLongitude, longStr, parseLongitude);
+    if (next !== null) setLongStr(next);
+  }, [longitude]);
+
   const handleLocate = () => {
     requestLocation()
       .then(onChange)
@@ -78,19 +105,21 @@ const CoordinateInput: React.FC<Props> = ({
         <input
           id="LocationInput__latitude"
           type="text"
-          value={latitude}
-          onChange={(event) =>
-            onChange({ latitude: Number(event.target.value) })
-          }
+          value={latStr}
+          onChange={(event) => {
+            setLatStr(event.target.value);
+            onChange({ latitude: parseLatitude(event.target.value) });
+          }}
         />
 
         <input
           id="LocationInput__longitude"
           type="text"
-          value={longitude}
-          onChange={(event) =>
-            onChange({ longitude: Number(event.target.value) })
-          }
+          value={longStr}
+          onChange={(event) => {
+            setLongStr(event.target.value);
+            onChange({ longitude: parseLongitude(event.target.value) });
+          }}
         />
 
         {geolocationAvailable && (
@@ -107,7 +136,7 @@ const CoordinateInput: React.FC<Props> = ({
 };
 
 const LocationInput: React.FC<Props> = ({ onChange, ...props }) => {
-  const hasCoordinates = props.longitude && props.latitude;
+  const hasCoordinates = isValidCoordinates(props.latitude, props.longitude);
   const [lookUp, toggleLookUp] = useToggle(!hasCoordinates);
 
   const handleChange = (coords: Coordinates) => {

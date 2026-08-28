@@ -9,7 +9,9 @@ interface Props {
 
 const IconButton: FC<Props> = ({ children, primary, ...props }) => (
   <button
-    className={`button--icon ${primary ? "button--primary" : ""}`}
+    className={["button--icon", primary ? "button--primary" : ""]
+      .filter(Boolean)
+      .join(" ")}
     {...props}
   >
     {children}

@@ -20,7 +20,7 @@ const ErrorProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const push = React.useCallback(
     (error: ErrorItem) =>
       setState((state) => ({ ...state, errors: state.errors.concat(error) })),
-    [setState],
+    [],
   );
 
   return (

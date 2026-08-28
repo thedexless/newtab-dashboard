@@ -18,6 +18,9 @@ const messages = defineMessages({
 const Search: FC<Props> = ({ data = defaultData }) => {
   const searchInput = useRef<HTMLInputElement>(null);
   const previousValue = useRef("");
+  // Monotonic identifier for in-flight suggestion requests; stale responses
+  // (whose id no longer matches the latest) are discarded to avoid races.
+  const requestId = useRef(0);
 
   const [active, setActive] = useState<number>();
   const [suggestions, setSuggestions] = useState<string[]>();
@@ -34,10 +37,18 @@ const Search: FC<Props> = ({ data = defaultData }) => {
     if (BUILD_TARGET === "web") {
       const suggestUrl = getSuggestUrl(data.suggestionsEngine);
       if (suggestUrl) {
-        getSuggestions(event.target.value, suggestUrl).then((suggestions) => {
-          setSuggestions(suggestions.slice(0, data.suggestionsQuantity));
-          setActive(undefined);
-        });
+        const id = ++requestId.current;
+        getSuggestions(event.target.value, suggestUrl)
+          .then((suggestions) => {
+            if (id !== requestId.current) return;
+            setSuggestions(suggestions.slice(0, data.suggestionsQuantity));
+            setActive(undefined);
+          })
+          .catch(() => {
+            if (id !== requestId.current) return;
+            setSuggestions(undefined);
+            setActive(undefined);
+          });
       }
     }
   };
@@ -49,20 +60,25 @@ const Search: FC<Props> = ({ data = defaultData }) => {
 
     event.preventDefault();
 
+    const moveActive = (delta: number) => {
+      if (suggestions!.length === 0) return;
+      const next =
+        active === undefined
+          ? delta > 0
+            ? 0
+            : suggestions!.length - 1
+          : (active + delta + suggestions!.length) % suggestions!.length;
+      searchInput.current!.value = suggestions![next];
+      setActive(next);
+    };
+
     switch (event.key) {
       case "ArrowUp":
-        const upTo = !active ? suggestions.length - 1 : active - 1;
-        searchInput.current!.value = suggestions[upTo];
-        setActive(upTo);
+        moveActive(-1);
         break;
 
       case "ArrowDown":
-        const downTo =
-          active === undefined || active === suggestions.length - 1
-            ? 0
-            : active + 1;
-        searchInput.current!.value = suggestions[downTo];
-        setActive(downTo);
+        moveActive(1);
         break;
 
       case "Escape":

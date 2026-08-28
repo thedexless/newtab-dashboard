@@ -29,7 +29,6 @@ const IntlTime: React.FC<Props> = ({
 }) => {
   const locale = useValue(db, "locale");
 
-  // Time formatter config
   const formater = React.useMemo(
     () =>
       Intl.DateTimeFormat(locale, {
@@ -42,21 +41,19 @@ const IntlTime: React.FC<Props> = ({
   );
 
   if (showDayPeriod) {
-    // Return normal time if showing timePeriod
     return <>{formater.format(time)}</>;
-  } else {
-    // Remove timePeriod from string
-    // Returns the date broken down into parts
-    return (
-      <>
-        {formater
-          .formatToParts(time)
-          .filter((part) => part.type !== "dayPeriod") // Removes day period from the array
-          .map((part) => part.value) // Converts array of objects to array of strings
-          .join("")}
-      </>
-    );
   }
+
+  // Remove dayPeriod from the formatted parts
+  return (
+    <>
+      {formater
+        .formatToParts(time)
+        .filter((part) => part.type !== "dayPeriod")
+        .map((part) => part.value)
+        .join("")}
+    </>
+  );
 };
 
 export default IntlTime;

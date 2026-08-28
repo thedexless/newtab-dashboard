@@ -13,10 +13,10 @@ const Greeting: FC<Props> = ({ data = defaultData }) => {
     () =>
       data.name
         ? intl.formatMessage(messages.greetingWithName, {
-            hour: hour,
+            hour,
             name: data.name,
           })
-        : intl.formatMessage(messages.greeting, { hour: hour }),
+        : intl.formatMessage(messages.greeting, { hour }),
     [data.name, hour, intl],
   );
 

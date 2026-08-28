@@ -27,7 +27,7 @@ export const setBackground = (key: string): void => {
 export const addWidget = (key: string): void => {
   const id = createId();
   const widgets = selectWidgets();
-  const order = widgets.length > 0 ? widgets[widgets.length - 1].order + 1 : 0;
+  const order = widgets.length > 0 ? widgets.at(-1)!.order + 1 : 0;
   DB.put(db, `widget/${id}`, {
     id,
     key,
@@ -80,25 +80,37 @@ export const importStore = (dump: any): void => {
   if (typeof dump !== "object" || dump === null)
     throw new TypeError("Unexpected format");
 
+  // Normalize and validate before clearing, so a failed import
+  // does not wipe existing settings.
+  const { entries } = normalizeDump(dump);
   resetStore();
+  // @ts-ignore
+  Object.entries(entries).forEach(([key, val]) => DB.put(db, key, val));
+};
+
+/** Normalize an imported dump to a set of entries based on its version. */
+function normalizeDump(dump: any): { entries: Record<string, unknown> } {
   if ("backgrounds" in dump) {
     // Version 2 config
-    DB.put(db, `widget/default-time`, null);
-    DB.put(db, `widget/default-greeting`, null);
-    dump = migrateFrom2(dump);
-  } else if (dump.version === 3) {
-    // Version 3 config
-    delete dump.version;
-  } else if (dump.version > 3) {
-    // Future version
-    throw new TypeError("Settings exported from an newer version of Tabliss");
-  } else {
-    // Unknown version
-    throw new TypeError("Unknown settings version");
+    return {
+      entries: {
+        ...migrateFrom2(dump),
+        "widget/default-time": null,
+        "widget/default-greeting": null,
+      },
+    };
   }
-  // @ts-ignore
-  Object.entries(dump).forEach(([key, val]) => DB.put(db, key, val));
-};
+
+  if (dump.version === 3) {
+    delete dump.version;
+    return { entries: dump };
+  }
+
+  if (dump.version > 3)
+    throw new TypeError("Settings exported from an newer version of Tabliss");
+
+  throw new TypeError("Unknown settings version");
+}
 
 /** Export a database dump */
 export const exportStore = (): string => {

@@ -4,9 +4,11 @@ type Props = JSX.IntrinsicElements["button"] & {
   primary?: boolean;
 };
 
-const Button: FC<Props> = ({ className, children, primary, ...props }) => (
+const Button: FC<Props> = ({ className = "", children, primary, ...props }) => (
   <button
-    className={`button ${primary ? "button--primary" : ""} ${className}`}
+    className={["button", primary ? "button--primary" : "", className]
+      .filter(Boolean)
+      .join(" ")}
     {...props}
   >
     {children}

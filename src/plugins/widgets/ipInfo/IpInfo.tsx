@@ -18,9 +18,11 @@ const IpInfo: React.FC<Props> = ({
     return null;
   }
 
-  const info = [cache.ip];
-  if (data.displayCity) info.push(cache.city);
-  if (data.displayCountry) info.push(cache.country);
+  const info = [
+    cache.ip,
+    data.displayCity && cache.city,
+    data.displayCountry && cache.country,
+  ].filter(Boolean);
 
   return <div className="IpInfo">{info.join(", ")}</div>;
 };

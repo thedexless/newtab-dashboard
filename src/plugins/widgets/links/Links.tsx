@@ -11,12 +11,12 @@ const Links: FC<Props> = ({ data = defaultData }) => {
 
   useKeyPress(
     ({ key }) => {
-      const index = Number(key) - 1;
-      if (data.links[index]) {
-        data.linkOpenStyle
-          ? window.open(data.links[index].url, "_blank")
-          : window.location.assign(data.links[index].url);
-      }
+      const link = data.links[Number(key) - 1];
+      if (!link) return;
+
+      data.linkOpenStyle
+        ? window.open(link.url, "_blank", "noopener")
+        : window.location.assign(link.url);
     },
     ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   );

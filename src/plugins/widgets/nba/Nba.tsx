@@ -30,24 +30,19 @@ const Nba: React.FC<Props> = ({
     return <div>No games today</div>;
   }
 
+  const renderLogo = (logo: string) =>
+    data.displayLogo ? <img className="icon" src={logo} alt="" /> : null;
+
   return (
     <div className="nba-container">
       {cache.games.map((game) => (
         <div key={game.gameId} className="nba-game">
           <div className="period">{getPeriod(game, timeZone)}</div>
-          <div>
-            {data.displayLogo ? (
-              <img className="icon" src={game.hTeam.logo} />
-            ) : null}
-          </div>
+          <div>{renderLogo(game.hTeam.logo)}</div>
           <span className="teams">
             {game.hTeam.triCode} - {game.vTeam.triCode}
           </span>
-          <div>
-            {data.displayLogo ? (
-              <img className="icon" src={game.vTeam.logo} />
-            ) : null}
-          </div>
+          <div>{renderLogo(game.vTeam.logo)}</div>
           <div className="score">
             {game.period.current ? (
               <span>

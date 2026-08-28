@@ -87,30 +87,24 @@ const config = {
   },
 };
 
-if (isProduction) {
-  config.plugins.push(
+const extraPlugins = [
+  isProduction &&
     new webpack.LoaderOptionsPlugin({
       minimize: true,
       debug: false,
     }),
-  );
-}
-
-if (!isWeb) {
-  config.plugins.push(
+  !isWeb &&
     new webpack.ProvidePlugin({
       browser: "webextension-polyfill",
     }),
-  );
-}
-
-if (isWeb && isProduction) {
-  config.plugins.push(
+  isWeb &&
+    isProduction &&
     new workbox.GenerateSW({
       cacheId: "tabliss-cache",
       dontCacheBustURLsMatching: /\.\w{12}\./,
     }),
-  );
-}
+].filter(Boolean);
+
+config.plugins.push(...extraPlugins);
 
 module.exports = config;

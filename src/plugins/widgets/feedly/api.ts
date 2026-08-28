@@ -17,10 +17,12 @@ export async function getArticles(
 
   loader.push();
   try {
-    const url = `${API_BASE}/streams/contents?streamId=${encodeURIComponent(
+    const params = new URLSearchParams({
       streamId,
-    )}&count=${count}&ranked=engagement`;
-    const res = await fetch(url, {
+      count: String(count),
+      ranked: "engagement",
+    });
+    const res = await fetch(`${API_BASE}/streams/contents?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
