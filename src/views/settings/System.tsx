@@ -27,7 +27,9 @@ const System: React.FC = () => {
         />
       </h2>
 
-      <label style={labelStyle}>
+      <label
+        style={labelStyle}
+      >
         <span>Language</span>
         <select
           value={locale}
@@ -171,7 +173,9 @@ const System: React.FC = () => {
         </select>
       </label>
 
-      <label style={labelStyle}>
+      <label
+        style={labelStyle}
+      >
         Time Zone
         <TimeZoneInput timeZone={timeZone} onChange={setTimeZone} />
       </label>
