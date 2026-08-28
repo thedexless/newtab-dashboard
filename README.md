@@ -1,3 +1,7 @@
+> **Personal fork** of [Tabliss](https://tabliss.io) — extended with custom widgets:
+> **Feedly reader** (LLM triage tags), **infra status**, and a **focus** widget.
+> Sentry error monitoring wired (org `daniel-0v`). Upstream docs follow below.
+
 <h1 align="center">Tabliss</h1>
 
 <p align="center">A beautiful, customisable New Tab page for Firefox and Chrome.</p>
