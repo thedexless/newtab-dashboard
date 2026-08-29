@@ -14,11 +14,7 @@ const WorkHours: React.FC<Props> = ({ data = defaultData }) => {
 
   return (
     <div className="WorkHours">
-      {isWorkDay(data.days) && (
-        <>
-          <h2>{hoursProgress(time, start, end)}%</h2>
-        </>
-      )}
+      {isWorkDay(data.days) && <h2>{hoursProgress(time, start, end)}%</h2>}
     </div>
   );
 };

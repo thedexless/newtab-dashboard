@@ -25,32 +25,26 @@ const TodoItem: FC<Props> = ({ item, onDelete, onUpdate, onToggle }) => {
     }
   }, [item.contents]);
 
-  useKeyPress(
-    (event) => {
-      if (event.target === ref.current) {
-        event.preventDefault();
+  const handleKeyPress = (event: KeyboardEvent, action: () => void) => {
+    if (event.target !== ref.current) return;
+    event.preventDefault();
+    if (ref.current) action();
+  };
 
-        if (ref.current) {
-          ref.current.blur();
-        }
-      }
-    },
+  useKeyPress(
+    (event) => handleKeyPress(event, () => ref.current?.blur()),
     ["Enter"],
     false,
   );
 
   useKeyPress(
-    (event) => {
-      if (event.target === ref.current) {
-        event.preventDefault();
-
+    (event) =>
+      handleKeyPress(event, () => {
         if (ref.current) {
-          // Reset contents on escape
           ref.current.innerText = item.contents;
           ref.current.blur();
         }
-      }
-    },
+      }),
     ["Escape"],
     false,
   );

@@ -64,7 +64,7 @@ const Joke: React.FC<Props> = ({
 };
 
 const TwoPartJoke: React.FC<{ joke: TwoPartJokeAPIResponse }> = ({ joke }) => {
-  const isJokeAQuestion = joke.setup.slice(-1) === "?";
+  const isJokeAQuestion = joke.setup.endsWith("?");
   const [showAnswer, setShowAnswer] = useState(false);
 
   useEffect(() => {

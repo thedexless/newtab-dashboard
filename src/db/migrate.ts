@@ -7,12 +7,7 @@ const migrateExtension = async (): Promise<void> => {
   const key = "persist:data";
   const stored = await browser.storage.sync.get(key);
   if (stored[key]) {
-    // Migrate if new database is empty
-    if (db.cache.size === 0) {
-      importStore(stored[key]);
-      migrateCache();
-      clearDangling();
-    }
+    migrateIfEmpty(stored[key]);
     await browser.storage.sync.remove(key);
   }
 };
@@ -22,16 +17,19 @@ const migrateWeb = async (): Promise<void> => {
   const key = "tabliss/data/persist:data";
   const data = localStorage.getItem(key);
   if (data) {
-    // Migrate if new database is empty
-    if (db.cache.size === 0) {
-      try {
-        importStore(JSON.parse(data));
-        migrateCache();
-        clearDangling();
-      } catch {}
-    }
+    try {
+      migrateIfEmpty(JSON.parse(data));
+    } catch {}
     localStorage.removeItem(key);
   }
+};
+
+/** Migrate legacy data into the new database if it is empty. */
+const migrateIfEmpty = (dump: unknown): void => {
+  if (db.cache.size !== 0) return;
+  importStore(dump);
+  migrateCache();
+  clearDangling();
 };
 
 /** Check and migrate data */

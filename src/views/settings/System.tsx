@@ -4,55 +4,6 @@ import { db } from "../../db/state";
 import { useKey } from "../../lib/db/react";
 import TimeZoneInput from "../shared/timeZone/TimeZoneInput";
 
-/** Locale code → native language name + English title hint. */
-const LANGUAGES: { value: string; title: string; label: string }[] = [
-  { value: "ar", title: "Arabic", label: "العربية" },
-  { value: "ca-ES", title: "Catalan", label: "Català" },
-  { value: "cs", title: "Czech", label: "Čeština" },
-  { value: "de", title: "German", label: "Deutsch" },
-  { value: "el", title: "Greek", label: "Ελληνικά" },
-  { value: "en-AU", title: "English (Australian)", label: "English (AU)" },
-  { value: "en-CA", title: "English (Canadian)", label: "English (CA)" },
-  { value: "en-GB", title: "English (British)", label: "English (GB)" },
-  { value: "en", title: "English (American)", label: "English (US)" },
-  { value: "es", title: "Spanish", label: "Español" },
-  { value: "fa", title: "Persian", label: "پارسی" },
-  { value: "fr", title: "French", label: "Français" },
-  { value: "he", title: "Hebrew", label: "עברית" },
-  { value: "ga", title: "Gaeilge", label: "Gaeilge" },
-  { value: "gd", title: "Scottish Gaelic", label: "Gàidhlig" },
-  { value: "gl", title: "Galician", label: "Galego" },
-  { value: "gu", title: "Gujarati", label: "ગુજરાતી" },
-  { value: "hi", title: "Hindi", label: "हिन्दी" },
-  { value: "hu", title: "Hungarian", label: "Magyar" },
-  { value: "id", title: "Indonesian", label: "Indonesian" },
-  { value: "it", title: "Italian", label: "Italiano" },
-  { value: "ja", title: "Japanese", label: "日本語" },
-  { value: "ko", title: "Korean", label: "한국어" },
-  { value: "kp", title: "North Korean", label: "조선말" },
-  { value: "lb", title: "Luxembourgish", label: "Lëtzebuergesch" },
-  { value: "lt", title: "Lithuanian", label: "Lietuvių k." },
-  { value: "ne", title: "Nepali", label: "Nepali" },
-  { value: "nl", title: "Dutch", label: "Nederlands" },
-  { value: "no", title: "Norwegian", label: "Norsk" },
-  { value: "pl", title: "Polish", label: "Polski" },
-  { value: "pt-BR", title: "Portuguese (Brazil)", label: "Português do Brasil" },
-  { value: "pt", title: "Portuguese (Portugal)", label: "Português de Portugal" },
-  { value: "ro", title: "Romanian", label: "Română" },
-  { value: "ru", title: "Russian", label: "Русский" },
-  { value: "sk", title: "Slovak", label: "Slovenčina" },
-  { value: "sr", title: "Serbian", label: "Српски" },
-  { value: "fi", title: "Finnish", label: "Suomi" },
-  { value: "sv", title: "Swedish", label: "Svenska" },
-  { value: "ta", title: "Tamil", label: "தமிழ்" },
-  { value: "th", title: "Thai", label: "ไทย" },
-  { value: "tr", title: "Turkish", label: "Türkçe" },
-  { value: "vi", title: "Vietnamese", label: "Tiếng Việt" },
-  { value: "zh-CN", title: "Simplified Chinese (China)", label: "中文（中国）" },
-  { value: "zh-TW", title: "Traditional Chinese (Taiwan)", label: "中文（台灣）" },
-  { value: "uk", title: "Ukrainian", label: "Українська" },
-];
-
 const labelStyle: React.CSSProperties = {
   alignItems: "center",
   display: "grid",
@@ -76,21 +27,155 @@ const System: React.FC = () => {
         />
       </h2>
 
-      <label style={labelStyle}>
+      <label
+        style={labelStyle}
+      >
         <span>Language</span>
         <select
           value={locale}
           onChange={(event) => setLocale(event.target.value)}
         >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value} title={lang.title}>
-              {lang.label}
-            </option>
-          ))}
+          <option value="ar" title="Arabic">
+            العربية
+          </option>
+          <option value="ca-ES" title="Catalan">
+            Català
+          </option>
+          <option value="cs" title="Czech">
+            Čeština
+          </option>
+          <option value="de" title="German">
+            Deutsch
+          </option>
+          <option value="el" title="Greek">
+            Ελληνικά
+          </option>
+          <option value="en-AU" title="English (Australian)">
+            English (AU)
+          </option>
+          <option value="en-CA" title="English (Canadian)">
+            English (CA)
+          </option>
+          <option value="en-GB" title="English (British)">
+            English (GB)
+          </option>
+          <option value="en" title="English (American)">
+            English (US)
+          </option>
+          <option value="es" title="Spanish">
+            Español
+          </option>
+          <option value="fa" title="Persian">
+            پارسی
+          </option>
+          <option value="fr" title="French">
+            Français
+          </option>
+          <option value="he" title="Hebrew">
+            עברית
+          </option>
+          <option value="ga" title="Gaeilge">
+            Gaeilge
+          </option>
+          <option value="gd" title="Scottish Gaelic">
+            Gàidhlig
+          </option>
+          <option value="gl" title="Galician">
+            Galego
+          </option>
+          <option value="gu" title="Gujarati">
+            ગુજરાતી
+          </option>
+          <option value="hi" title="Hindi">
+            हिन्दी
+          </option>
+          <option value="hu" title="Hungarian">
+            Magyar
+          </option>
+          <option value="id" title="Indonesian">
+            Indonesian
+          </option>
+          <option value="it" title="Italian">
+            Italiano
+          </option>
+          <option value="ja" title="Japanese">
+            日本語
+          </option>
+          <option value="ko" title="Korean">
+            한국어
+          </option>
+          <option value="kp" title="North Korean">
+            조선말
+          </option>
+          <option value="lb" title="Luxembourgish">
+            Lëtzebuergesch
+          </option>
+          <option value="lt" title="Lithuanian">
+            Lietuvių k.
+          </option>
+          <option value="ne" title="Nepali">
+            Nepali
+          </option>
+          <option value="nl" title="Dutch">
+            Nederlands
+          </option>
+          <option value="no" title="Norwegian">
+            Norsk
+          </option>
+          <option value="pl" title="Polish">
+            Polski
+          </option>
+          <option value="pt-BR" title="Portuguese (Brazil)">
+            Português do Brasil
+          </option>
+          <option value="pt" title="Portuguese (Portugal)">
+            Português de Portugal
+          </option>
+          <option value="ro" title="Romanian">
+            Română
+          </option>
+          <option value="ru" title="Russian">
+            Русский
+          </option>
+          <option value="sk" title="Slovak">
+            Slovenčina
+          </option>
+          <option value="sr" title="Serbian">
+            Српски
+          </option>
+          <option value="fi" title="Finnish">
+            Suomi
+          </option>
+          <option value="sv" title="Swedish">
+            Svenska
+          </option>
+          <option value="ta" title="Tamil">
+            தமிழ்
+          </option>
+          <option value="th" title="Thai">
+            ไทย
+          </option>
+          <option value="tr" title="Turkish">
+            Türkçe
+          </option>
+          <option value="vi" title="Vietnamese">
+            Tiếng Việt
+          </option>
+          <option value="zh-CN" title="Simplified Chinese (China)">
+            中文（中国）
+          </option>
+          <option value="zh-TW" title="Traditional Chinese (Taiwan)">
+            中文（台灣）
+          </option>
+          <option value="uk" title="Ukrainian">
+            Українська
+          </option>
         </select>
       </label>
 
-      <label style={labelStyle}>
+      <label
+        style={labelStyle}
+      >
         Time Zone
         <TimeZoneInput timeZone={timeZone} onChange={setTimeZone} />
       </label>

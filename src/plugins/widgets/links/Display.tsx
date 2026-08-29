@@ -4,23 +4,21 @@ import { defineMessages, useIntl } from "react-intl";
 import { Icon } from "../../../views/shared";
 import { Link } from "./types";
 
-const displayUrl = (url: string): string => {
+const parseUrl = (url: string): URL | null => {
   try {
-    const parsed = new URL(url);
-    return parsed.hostname + (parsed.pathname !== "/" ? parsed.pathname : "");
-  } catch (e) {
-    return url;
-  }
-};
-
-const getDomain = (url: string): string | null => {
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname;
-  } catch (e) {
+    return new URL(url);
+  } catch {
     return null;
   }
 };
+
+const displayUrl = (url: string): string => {
+  const parsed = parseUrl(url);
+  if (!parsed) return url;
+  return parsed.hostname + (parsed.pathname !== "/" ? parsed.pathname : "");
+};
+
+const getDomain = (url: string): string | null => parseUrl(url)?.hostname ?? null;
 
 const messages = defineMessages({
   shortcutHint: {

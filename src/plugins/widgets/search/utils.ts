@@ -18,13 +18,9 @@ export function buildUrl(query: string, engineUrl: string) {
 }
 
 export function getSearchUrl(key: string) {
-  const engine = engines.find((engine) => engine.key === key);
-
-  return (engine || engines[0]).search_url;
+  return engines.find((engine) => engine.key === key)?.search_url ?? engines[0].search_url;
 }
 
 export function getSuggestUrl(key?: string) {
-  const engine = engines.find((engine) => engine.key === key);
-
-  return engine ? engine.suggest_url : undefined;
+  return engines.find((engine) => engine.key === key)?.suggest_url;
 }

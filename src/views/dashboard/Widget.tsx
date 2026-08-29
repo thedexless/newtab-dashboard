@@ -9,7 +9,7 @@ const Widget: React.FC<React.PropsWithChildren<WidgetDisplay>> = ({
   fontWeight,
 }) => (
   <div
-    className={`Widget ${fontWeight ? "weight-override" : ""}`}
+    className={`Widget${fontWeight ? " weight-override" : ""}`}
     style={{
       color: colour,
       fontFamily,

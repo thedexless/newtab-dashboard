@@ -24,48 +24,48 @@ const Settings: React.FC = () => {
   };
 
   const handleExport = () => {
-    const json = exportStore();
     const url = URL.createObjectURL(
-      new Blob([json], { type: "application/json" }),
+      new Blob([exportStore()], { type: "application/json" }),
     );
 
-    const a = document.createElement("a");
-    document.body.appendChild(a);
-    a.style.display = "none";
-    a.href = url;
-    a.download = "tabliss.json";
+    const a = withTempElement<HTMLAnchorElement>("a", (a) => {
+      a.href = url;
+      a.download = "tabliss.json";
+      a.style.display = "none";
+    });
+
     a.click();
     window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    a.remove();
   };
 
   const handleImport = () => {
-    const input = document.createElement("input");
-    document.body.appendChild(input);
-    input.style.display = "none";
-    input.type = "file";
-    input.addEventListener("change", function () {
-      if (this.files) {
-        const file = this.files[0];
+    const input = withTempElement<HTMLInputElement>("input", (input) => {
+      input.type = "file";
+      input.style.display = "none";
+      input.addEventListener("change", () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
         const reader = new FileReader();
         reader.addEventListener("load", (event) => {
-          if (event.target && event.target.result) {
-            try {
-              const state = JSON.parse(event.target.result as string);
-              importStore(state);
-            } catch (error) {
-              alert(
-                `Invalid import file: ${
-                  error instanceof Error ? error.message : "Uknown error"
-                }`,
-              );
-            }
+          const result = event.target?.result;
+          if (typeof result !== "string") return;
+          try {
+            importStore(JSON.parse(result));
+          } catch (error) {
+            alert(
+              `Invalid import file: ${
+                error instanceof Error ? error.message : "Unknown error"
+              }`,
+            );
           }
         });
         reader.readAsText(file);
-      }
-      document.body.removeChild(input);
+        input.remove();
+      });
     });
+
     input.click();
   };
 
@@ -140,3 +140,14 @@ const Settings: React.FC = () => {
 };
 
 export default React.memo(Settings);
+
+/** Create a temporary DOM element, configure it, append to body, and return it. */
+function withTempElement<T extends HTMLElement = HTMLElement>(
+  tag: string,
+  configure: (el: T) => void,
+): T {
+  const el = document.createElement(tag) as T;
+  configure(el);
+  document.body.appendChild(el);
+  return el;
+}

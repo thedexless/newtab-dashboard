@@ -6,14 +6,16 @@ export async function getJoke(
   categories: Set<JokeAPICategory>,
   locale: string,
 ) {
-  const languageUrlParameter = `lang=${locale}`;
-  const safeModeUrlParameter = "safe-mode";
-  const categoriesUrlParameter = Array.from(categories).join(",");
+  const params = new URLSearchParams({
+    "safe-mode": "",
+    lang: locale,
+  });
+  const categoriesPath = Array.from(categories).join(",");
 
   const res = await fetch(
     // Note: We will always ask jokeapi to return safe jokes for everyone.
     // This is to comply with content policies (i.e. Hate speech) for all platforms.
-    `${url}/${categoriesUrlParameter}?${safeModeUrlParameter}&${languageUrlParameter}`,
+    `${url}/${categoriesPath}?${params}`,
   );
   const body: JokeAPIResponse = await res.json();
 

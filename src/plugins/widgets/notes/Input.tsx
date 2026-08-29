@@ -28,8 +28,10 @@ const Input: React.FC<Props> = ({ onChange, value, ...props }) => {
   );
 
   const handleBlur = () => {
-    if (span.current!.innerText.trim() === "") span.current!.innerText = "";
-    if (span.current!.innerText !== value) onChange(span.current!.innerText);
+    const el = span.current!;
+    const text = el.innerText.trim();
+    if (text === "") el.innerText = "";
+    if (el.innerText !== value) onChange(el.innerText);
     setIsEditing(false);
   };
   const handleFocus = () => {

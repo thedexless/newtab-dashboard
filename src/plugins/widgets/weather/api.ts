@@ -13,17 +13,19 @@ export async function getForecast(
   }
 
   loader.push();
-  const url =
-    "https://api.open-meteo.com/v1/forecast?" +
-    `latitude=${latitude}&` +
-    `longitude=${longitude}&` +
-    "hourly=temperature_2m&" +
-    "hourly=apparent_temperature&" +
-    "hourly=relativehumidity_2m&" +
-    "hourly=weathercode&" +
-    "timeformat=unixtime&" +
-    `temperature_unit=${units === "us" ? "fahrenheit" : "celsius"}`;
-  const res = await fetch(url);
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    hourly: [
+      "temperature_2m",
+      "apparent_temperature",
+      "relativehumidity_2m",
+      "weathercode",
+    ].join(","),
+    timeformat: "unixtime",
+    temperature_unit: units === "us" ? "fahrenheit" : "celsius",
+  });
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
   const body = await res.json();
   loader.pop();
 
@@ -57,8 +59,10 @@ export function requestLocation(): Promise<Coordinates> {
 
 /** Perform geocoding lookup on query string */
 export async function geocodeLocation(query: string): Promise<Coordinates> {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=1`;
-  const res = await fetch(url);
+  const params = new URLSearchParams({ name: query, count: "1" });
+  const res = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?${params}`,
+  );
   const data = await res.json();
 
   return {

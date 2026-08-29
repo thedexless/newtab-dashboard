@@ -18,6 +18,30 @@ const messages = defineMessages({
   },
 });
 
+type StorageSpec = {
+  storage: Promise<Stream.Stream<Error>>;
+  saveError: string;
+  openError: string;
+  showError: boolean;
+};
+
+const STORAGE_SPECS: StorageSpec[] = [
+  {
+    storage: dbStorage,
+    saveError:
+      "Cannot save your settings. You may have hit the maximum storage capacity.",
+    openError:
+      "Cannot open settings storage. Your settings cannot be loaded or saved.",
+    showError: true,
+  },
+  {
+    storage: cacheStorage,
+    saveError: "Cannot save cache. Start up performance may be degraded.",
+    openError: "Cannot open cache. Start up performance may be degraded.",
+    showError: false,
+  },
+];
+
 const Root: React.FC = () => {
   // Set page title
   const intl = useIntl();
@@ -39,42 +63,13 @@ const Root: React.FC = () => {
     };
 
   React.useEffect(() => {
-    const subscriptions = Promise.all([
-      // Config database
-      dbStorage
-        .then((errors) =>
-          Stream.subscribe(
-            errors,
-            handleError(
-              "Cannot save your settings. You may have hit the maximum storage capacity.",
-              true,
-            ),
-          ),
-        )
-        .catch(
-          handleError(
-            "Cannot open settings storage. Your settings cannot be loaded or saved.",
-            true,
-          ),
-        ),
-      // Cache database
-      cacheStorage
-        .then((errors) =>
-          Stream.subscribe(
-            errors,
-            handleError(
-              "Cannot save cache. Start up performance may be degraded.",
-              false,
-            ),
-          ),
-        )
-        .catch(
-          handleError(
-            "Cannot open cache. Start up performance may be degraded.",
-            false,
-          ),
-        ),
-    ]);
+    const subscriptions = Promise.all(
+      STORAGE_SPECS.map(({ storage, saveError, openError, showError }) =>
+        storage
+          .then((errors) => Stream.subscribe(errors, handleError(saveError, showError)))
+          .catch(handleError(openError, showError)),
+      ),
+    );
 
     // Storage is ready
     subscriptions.then(() => {
@@ -84,10 +79,7 @@ const Root: React.FC = () => {
 
     return () => {
       // Remove error subscriptions
-      subscriptions.then(([dbSub, cacheSub]) => {
-        if (dbSub) dbSub();
-        if (cacheSub) cacheSub();
-      });
+      subscriptions.then((subs) => subs.forEach((sub) => sub?.()));
     };
   }, []);
 
